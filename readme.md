@@ -1,224 +1,124 @@
-# Documentação do Fluxo de Análise de Código
+# Documentação da Extensão `gh-gandalf-scc`
 
-## Visão Geral
+## Descrição
 
-Este documento descreve o fluxo de análise de código implementado no projeto Go. O fluxo utiliza o pacote `scc` (Source Code Counter) para avaliar a complexidade ciclomática dos arquivos de código e garantir que eles não excedam um limite definido. A instalação e execução do `scc` são automatizadas e adaptadas para diferentes sistemas operacionais.
+A extensão `gh-gandalf-scc` é uma ferramenta desenvolvida para o GitHub CLI (`gh`) que realiza análise de complexidade ciclomática no código-fonte de um repositório. Utiliza a ferramenta `scc` (Source Code Complexity) para gerar relatórios detalhados sobre a complexidade do código.
 
-## Estrutura do Pacote
+## Funcionalidades
 
-O pacote `analyzer` contém as seguintes funções e responsabilidades:
+- **Análise de Complexidade Ciclomática:** Executa uma análise detalhada da complexidade ciclomática dos arquivos de código-fonte.
+- **Integração com GitHub CLI:** Funciona como uma extensão do GitHub CLI, permitindo que você execute a análise diretamente de seus comandos `gh`.
 
-1. **Instalação do `scc`**:
+## Instalação
 
-   - Instala o `scc` com base no sistema operacional (Windows, Linux, macOS).
+### Requisitos
 
-2. **Análise de Arquivos**:
-   - **`AnalyzeFile(filePath string) (*FileAnalysis, error)`**: Executa o `scc` em um arquivo e retorna a análise em formato JSON.
-   - **`GetAllFiles(dirPath string) ([]string, error)`**: Obtém todos os arquivos de um diretório especificado.
-   - **`AnalyzeAllFiles(pathToAnalyze string) error`**: Analisa todos os arquivos em um diretório e verifica a complexidade ciclomática.
+- **GitHub CLI:** Instale o GitHub CLI seguindo as instruções na [documentação oficial](https://cli.github.com/).
+- **scc:** A extensão utiliza o `scc` para análise de complexidade. Certifique-se de ter o binário `scc` instalado e acessível no PATH.
 
-## Instalação do `scc`
+### Passos para Instalação
 
-### Instalação no Windows
+1. **Instale o GitHub CLI:**
 
-Para instalar o `scc` no Windows, o pacote `analyzer` executa um comando PowerShell que baixa e descompacta o arquivo binário do `scc`.
+   Siga as instruções na [documentação oficial do GitHub CLI](https://cli.github.com/) para instalar o `gh`.
 
-```go
-func installSCCWindows() error {
-	cmd := exec.Command("powershell", "-Command", "Invoke-WebRequest -Uri https://github.com/boyter/scc/releases/download/v1.0.0/scc-windows-amd64.zip -OutFile scc.zip; Expand-Archive scc.zip -DestinationPath .")
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("erro ao instalar o scc no Windows: %v", err)
-	}
-	return nil
-}
-```
+2. **Instale o Binário `scc`:**
 
-### Instalação no Linux
+   - **Linux:**
 
-Para Linux, o `scc` é baixado, extraído e movido para o diretório `/usr/local/bin`:
+     ```sh
+     wget https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-linux-amd64.tar.gz
+     tar -xzf scc-v3.3.5-linux-amd64.tar.gz
+     sudo mv scc /usr/local/bin/
+     ```
 
-```go
-func installSCCLinux() error {
-	cmd := exec.Command("curl", "-LO", "https://github.com/boyter/scc/releases/download/v1.0.0/scc-linux-amd64.tar.gz")
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("erro ao baixar o scc no Linux: %v", err)
-	}
+   - **Windows:**
+     ```powershell
+     curl -LO https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-win64.zip
+     Expand-Archive scc-v3.3.5-win64.zip -DestinationPath .\scc
+     copy .\scc\scc.exe C:\Windows\System32
+     ```
 
-	cmd = exec.Command("tar", "-xzf", "scc-linux-amd64.tar.gz")
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("erro ao extrair o scc no Linux: %v", err)
-	}
+3. **Instale a Extensão `gh-gandalf-scc`:**
 
-	cmd = exec.Command("sudo", "mv", "scc", "/usr/local/bin/scc")
-	err = cmd.Run()
-	if err != nil {
-		return fmt.Errorf("erro ao mover o scc para /usr/local/bin no Linux: %v", err)
-	}
+   No terminal, execute:
 
-	return nil
-}
-```
+   ```sh
+   gh extension install pqdluiz/gh-gandalf-scc
+   ```
 
-### Instalação no macOS
+## Uso
 
-No macOS, o `scc` é instalado usando o Homebrew:
+### Comandos
 
-```go
-func installSCCMac() error {
-	cmd := exec.Command("brew", "install", "scc")
-	err := cmd.Run()
-	if err != nil {
-		return fmt.Errorf("erro ao instalar o scc no macOS: %v", err)
-	}
-	return nil
-}
-```
+1. **Executar Análise de Complexidade Ciclomática:**
 
-## Funções de Análise
+   Após a instalação, você pode usar a extensão para realizar a análise de complexidade ciclomática com o comando:
 
-### `AnalyzeFile`
+   ```sh
+   gh gandalf-scc
+   ```
 
-Executa o `scc` em um arquivo específico e analisa o resultado JSON para retornar a análise detalhada.
+   Esse comando irá:
 
-```go
-func AnalyzeFile(filePath string) (*FileAnalysis, error) {
-	cmd := exec.Command("scc", "--by-file", "--format", "json", filePath)
-	output, err := cmd.CombinedOutput()
-	if err != nil {
-		return nil, fmt.Errorf("error executing scc on file %s: %v", filePath, err)
-	}
+   - Analisar os arquivos de código fonte nos diretórios especificados.
+   - Gerar um relatório de complexidade ciclomática usando o `scc`.
 
-	var results []FileAnalysis
-	if err := json.Unmarshal(output, &results); err != nil {
-		return nil, fmt.Errorf("error parsing JSON output for file %s: %v", filePath, err)
-	}
+### Opções
 
-	if len(results) == 0 {
-		return nil, fmt.Errorf("no results found for file %s", filePath)
-	}
-
-	return &results[0], nil
-}
-```
-
-### `GetAllFiles`
-
-Obtém todos os arquivos de um diretório, ignorando subdiretórios.
-
-```go
-func GetAllFiles(dirPath string) ([]string, error) {
-	var files []string
-	err := filepath.WalkDir(dirPath, func(path string, entry os.DirEntry, err error) error {
-		if err != nil {
-			return err
-		}
-		if !entry.IsDir() {
-			files = append(files, path)
-		}
-		return nil
-	})
-	if err != nil {
-		return nil, err
-	}
-	return files, nil
-}
-```
-
-### `AnalyzeAllFiles`
-
-Analisa todos os arquivos no diretório especificado e verifica se a complexidade ciclomática excede o limite definido.
-
-```go
-func AnalyzeAllFiles(pathToAnalyze string) error {
-	fmt.Println("Info: Start process", time.Now().Format(time.RFC3339))
-
-	files, err := GetAllFiles(pathToAnalyze)
-	if err != nil {
-		return fmt.Errorf("error getting files: %v", err)
-	}
-
-	hasHighComplexity := false
-
-	for _, file := range files {
-		result, err := AnalyzeFile(file)
-		if err != nil {
-			fmt.Println(err)
-			continue
-		}
-
-		if result.Complexity > complexityLimit {
-			fmt.Printf("Arquivo: %s\n", file)
-			fmt.Printf("Linhas: %d\n", result.Lines)
-			fmt.Printf("Linhas de Código: %d\n", result.Code)
-			fmt.Printf("Linhas de Comentário: %d\n", result.Comment)
-			fmt.Printf("Linhas em Branco: %d\n", result.Blank)
-			fmt.Printf("Complexidade: %d\n", result.Complexity)
-			fmt.Println("--------------------------------------------")
-			fmt.Printf("⚠️ Alta complexidade detectada! Por favor, refatore esse arquivo:\n%s\n", file)
-			fmt.Printf("O limite de nível de complexidade permitido é de %d\n", complexityLimit)
-			fmt.Println("Para saber mais detalhes sobre a verificação ciclomática de código:")
-			fmt.Println("https://github.com/boyter/scc?tab=readme-ov-file#complexity-estimates")
-
-			hasHighComplexity = true
-		}
-	}
-
-	fmt.Printf("Cyclomatic complexity analysis for repository with: %d files.\n", len(files))
-	fmt.Println("Info: End process", time.Now().Format(time.RFC3339))
-
-	if hasHighComplexity {
-		fmt.Println("⚠️ Complexidade alta detectada. Push abortado.")
-		return fmt.Errorf("complexidade alta detectada")
-	}
-
-	return nil
-}
-```
-
-## Testes Unitários
-
-Os testes unitários devem cobrir os seguintes cenários:
-
-- **Teste de Instalação**:
-
-  - Verificar se a função de instalação do `scc` executa corretamente para cada sistema operacional (Windows, Linux, macOS).
-
-- **Teste de Análise de Arquivo**:
-
-  - Simular a execução do comando `scc` e verificar se a análise de um arquivo retorna os resultados esperados.
-
-- **Teste de Obtenção de Arquivos**:
-
-  - Verificar se a função de obtenção de arquivos lista corretamente todos os arquivos de um diretório.
-
-- **Teste de Análise de Todos os Arquivos**:
-  - Testar se a função de análise de todos os arquivos verifica corretamente a complexidade ciclomática e lida com casos de erro.
+- **Diretórios a serem analisados:** A extensão está configurada para analisar diretórios como `web`, `src`, `scripts`, `internal`, `api`, `pages`, e `cmd`. Você pode modificar esses diretórios no código da extensão se necessário.
 
 ## Desenvolvimento
 
-### Build
+### Estrutura do Projeto
 
-Para compilar o projeto, execute:
+- **Diretório `cmd/`:** Contém o código principal da extensão, incluindo o arquivo `main.go` que define a lógica e os comandos.
+- **Diretório `analyzer/`:** Contém o código para análise de complexidade ciclomática usando o `scc`.
 
-```bash
-go build -o cli-command cmd/main.go
+### Compilação
+
+Para compilar a extensão localmente, execute:
+
+```sh
+go build -o gh-gandalf-scc cmd/main.go
 ```
 
-### Run
+### Testes
 
-Para executar o projeto, utilize:
+Para testar a extensão localmente, execute:
 
-```bash
-./cli-command
+```sh
+gh extension install /path/to/your/local/gh-gandalf-scc
+gh gandalf-scc
 ```
 
-### Test
+## Contribuição
 
-Para rodar os testes, execute:
+Se você deseja contribuir para o desenvolvimento da extensão, siga as diretrizes abaixo:
 
-```bash
-go test ./...
-```
+1. **Faça um Fork do Repositório:**
+
+   - Crie um fork do repositório no GitHub.
+
+2. **Clone o Repositório:**
+
+   - Clone o repositório forkado para seu ambiente local.
+
+3. **Faça suas Alterações:**
+
+   - Implemente as alterações desejadas e teste a extensão localmente.
+
+4. **Envie um Pull Request:**
+   - Envie um pull request para o repositório principal com suas alterações.
+
+## Licença
+
+Esta extensão está licenciada sob a [Licença MIT](https://opensource.org/licenses/MIT).
+
+---
+
+### **Dúvidas e Suporte**
+
+Para dúvidas ou suporte, você pode abrir uma issue no [repositório do GitHub](https://github.com/pqdluiz/gh-gandalf-scc/issues).
+
+---
