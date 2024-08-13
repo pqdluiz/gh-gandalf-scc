@@ -11,10 +11,7 @@ A extensão `gh-gandalf-scc` é uma ferramenta desenvolvida para o GitHub CLI (`
 
 ## Instalação
 
-### Requisitos
-
-- **GitHub CLI:** Instale o GitHub CLI seguindo as instruções na [documentação oficial](https://cli.github.com/).
-- **scc:** A extensão utiliza o `scc` para análise de complexidade. Certifique-se de ter o binário `scc` instalado e acessível no PATH.
+A extensão `gh-gandalf-scc` inclui um fluxo para instalação automática do `scc` em Linux, macOS e Windows. Siga os passos abaixo para instalar e configurar a extensão.
 
 ### Passos para Instalação
 
@@ -22,30 +19,15 @@ A extensão `gh-gandalf-scc` é uma ferramenta desenvolvida para o GitHub CLI (`
 
    Siga as instruções na [documentação oficial do GitHub CLI](https://cli.github.com/) para instalar o `gh`.
 
-2. **Instale o Binário `scc`:**
-
-   - **Linux:**
-
-     ```sh
-     wget https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-linux-amd64.tar.gz
-     tar -xzf scc-v3.3.5-linux-amd64.tar.gz
-     sudo mv scc /usr/local/bin/
-     ```
-
-   - **Windows:**
-     ```powershell
-     curl -LO https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-win64.zip
-     Expand-Archive scc-v3.3.5-win64.zip -DestinationPath .\scc
-     copy .\scc\scc.exe C:\Windows\System32
-     ```
-
-3. **Instale a Extensão `gh-gandalf-scc`:**
+2. **Instale a Extensão `gh-gandalf-scc`:**
 
    No terminal, execute:
 
    ```sh
    gh extension install pqdluiz/gh-gandalf-scc
    ```
+
+   A extensão se encarregará de verificar e instalar o `scc` automaticamente.
 
 ## Uso
 
@@ -109,6 +91,7 @@ Se você deseja contribuir para o desenvolvimento da extensão, siga as diretriz
    - Implemente as alterações desejadas e teste a extensão localmente.
 
 4. **Envie um Pull Request:**
+
    - Envie um pull request para o repositório principal com suas alterações.
 
 ## Licença
@@ -122,3 +105,37 @@ Esta extensão está licenciada sob a [Licença MIT](https://opensource.org/lice
 Para dúvidas ou suporte, você pode abrir uma issue no [repositório do GitHub](https://github.com/pqdluiz/gh-gandalf-scc/issues).
 
 ---
+
+## Código da Instalação Automática do `scc`
+
+Aqui está o trecho de código da extensão responsável pela instalação automática do `scc`:
+
+```sh
+#!/usr/bin/env bash
+
+# Determine the OS and architecture
+OS=$(uname | tr '[:upper:]' '[:lower:]')
+ARCH=$(uname -m)
+
+# Download and install the correct version of scc
+case "$OS" in
+  linux)
+    URL="https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-linux-amd64.tar.gz"
+    curl -LO $URL
+    tar -xzf scc-v3.3.5-linux-amd64.tar.gz
+    sudo mv scc /usr/local/bin/
+    ;;
+  darwin)
+    URL="https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-darwin-amd64.tar.gz"
+    curl -LO $URL
+    tar -xzf scc-v3.3.5-darwin-amd64.tar.gz
+    sudo mv scc /usr/local/bin/
+    ;;
+  *)
+    echo "Unsupported OS: $OS"
+    exit 1
+    ;;
+esac
+```
+
+Para Windows, a instalação do `scc` é feita de maneira similar com o uso do PowerShell para baixar e extrair o arquivo ZIP.
