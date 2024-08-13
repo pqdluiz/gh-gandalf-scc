@@ -2,7 +2,7 @@
 set -e
 
 # Caminho para o binário do Go
-BIN_PATH="./cli-command"
+BIN_PATH="./cli-command-gandalf"
 
 # Verifique se o binário existe e é executável
 if [ ! -x "$BIN_PATH" ]; then
