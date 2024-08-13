@@ -1,8 +1,11 @@
 #!/usr/bin/env bash
 set -e
 
-# Caminho para o binário do Go
-BIN_PATH="./cli-command-gandalf"
+# Obtenha o diretório onde o script está localizado
+SCRIPT_DIR="$(dirname "$(realpath "$0")")"
+
+# Caminho relativo para o binário dentro do repositório
+BIN_PATH="$SCRIPT_DIR/cli-command-gandalf"
 
 # Verifique se o binário existe e é executável
 if [ ! -x "$BIN_PATH" ]; then
