@@ -70,7 +70,7 @@ go build -o gh-gandalf-scc cmd/main.go
 Para testar a extensão localmente, execute:
 
 ```sh
-gh extension install /path/to/your/local/gh-gandalf-scc
+gh extension install https://github.com/pqdluiz/gh-gandalf-scc
 gh gandalf-scc
 ```
 
