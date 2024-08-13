@@ -9,7 +9,7 @@ import (
 	"github.com/pqdluiz/cli-command/models"
 )
 
-const complexityLimit = 1
+const complexityLimit = 25
 
 // AnalyzeAllFiles analisa a complexidade dos arquivos em diretórios específicos.
 func AnalyzeAllFiles(directories []string) error {

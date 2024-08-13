@@ -33,7 +33,7 @@ func installSCCLinux() error {
 	}
 
 	// Calcular o checksum do arquivo baixado
-	calculatedChecksum, err := checksum.calculateChecksum(tarFilePath)
+	calculatedChecksum, err := calculateChecksum(tarFilePath)
 	if err != nil {
 		return fmt.Errorf("erro ao calcular o checksum: %v", err)
 	}

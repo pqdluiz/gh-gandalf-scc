@@ -33,7 +33,7 @@ func installSCCWindows() error {
 	}
 
 	// Calcular o checksum do arquivo baixado
-	calculatedChecksum, err := checksum.calculateChecksum(zipFilePath)
+	calculatedChecksum, err := calculateChecksum(zipFilePath)
 	if err != nil {
 		return fmt.Errorf("erro ao calcular o checksum: %v", err)
 	}
