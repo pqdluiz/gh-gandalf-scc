@@ -7,7 +7,7 @@ import (
 
 func installSCCLinux() error {
 	// Instala SCC no Linux
-	cmd := exec.Command("curl", "-LO", "https://github.com/boyter/scc/releases/download/v1.0.0/scc-linux-amd64.tar.gz")
+	cmd := exec.Command("wget", "https://github.com/boyter/scc/releases/download/v3.3.5/scc-v3.3.5-linux-amd64.tar.gz")
 	err := cmd.Run()
 	if err != nil {
 		return fmt.Errorf("erro ao baixar o scc no Linux: %v", err)
